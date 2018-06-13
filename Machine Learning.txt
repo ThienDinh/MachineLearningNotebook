@@ -1,0 +1,16 @@
+Framing: Key ML Terminology
+https://developers.google.com/machine-learning/crash-course
+
+--? What is supervised machine learning?
+Given data input (training set), the Machine Learning System (MLS) utilizes the data input to analyze the unknown data.
+In other words, having learning about many settings of characteristics of an entity, given a new incomplete setting of characteristics of the entity, what can we say about the other missing characteristics of the entity.
+
+--? What is a label?
+A label is the thing that we try to predict its value. The label could be considered as one of the characteristics that the entity has.
+
+--? What is a feature?
+A feature is one of the characteristics of the entity that we are studying. For example, for spam detector, the entity is email, and the features are words in the email text, sender's address, time of the day the email was sent.
+
+--? What is an example?
+An example is one instance of the data. We can say that it's one of the settings of the characteristics of the entity.
+There are two types of example, one is labeled examples and the other is unlabeld examples. The labeled example includes all the characteristics of the entity. The unlabeled example includes all characteristics of the entity, but the one that we try to infer about. We use labeled example as a thorough understanding of the entity, to learn about the entity, to use it as a fact about the entity. Using the labeled examples, we can build a model that can infer about the missing label on the unlabeled examples.
