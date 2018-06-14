@@ -14,3 +14,24 @@ A feature is one of the characteristics of the entity that we are studying. For 
 --? What is an example?
 An example is one instance of the data. We can say that it's one of the settings of the characteristics of the entity.
 There are two types of example, one is labeled examples and the other is unlabeld examples. The labeled example includes all the characteristics of the entity. The unlabeled example includes all characteristics of the entity, but the one that we try to infer about. We use labeled example as a thorough understanding of the entity, to learn about the entity, to use it as a fact about the entity. Using the labeled examples, we can build a model that can infer about the missing label on the unlabeled examples.
+
+--? What is a model?
+A model defines the relationship between features and label; in other words, relationship between one characteristic to other characteristics of an entity. i.e. a spam detection model might associate certain features strongly with "spam".
+For each model, there are two phases of its life:
+	Training means creating or learning the model. Expose the model to labeled examples so that the model can learn the relationship between one characteristic and the other characteristics of the entity.
+	Inference means applying the trained model to unlabeled examples. Let the model predict the value of the characteristic when what it know only is the other characteristics of the entity. i.e. during inference, the model can predict medianHouseValue for new unlabeled examples.
+
+--? What is the difference between regression vs. classification models?
+A regression model predicts continuous values, meaning real values. i.e. What is the value of a house in California? or What is the probability that a user will click on this ad?
+A classification model predicts discrete values, meaning finite set of values. i.e. Is a given email message spam or not spam? or Is this an image of a dog, a cat, or a hamster?
+
+--? An example of linear regression.
+We want to investigate the relationship between cricket's chirps per minute and the temperature in Celcius. We attempt to draw a line to capture the relationship between these two characteristics. Mathematically, we can numerically capture this relationship with this equation y = mx + b, where y is the temperature(what we want to predict), m is the slope of the line, x is the number of chirps per minute(what we use to predict), and b is the y-intercept. Converting this equation from mathematics context to machine learning context, we use a little bit different naming convention for the variables. The equation would be rewritten as y' = b + w1.x1, where y' is the predicted label, b is the bias(y-intercept), w1 is the weight of feature 1(slop of the line), and x1 is the feature.
+To infer the temperature y' for a new chirps-per-minute value x1 in our example, substitute the value and calculate the equation to get the value for y'.
+For a more sophisticated model, it may use multiple characteristics to predict the label. i.e The equation would be y' = b + w1.x1 + w2.x2 + w3.x3
+
+--? What does it means when we say we are traing a model?
+Training a model simply means learning (determining, figuring out) the good values for all the weights and the bias from labeled examples. In other words, we need to draw the relationship line, which requires figuring the best values for the slop and the intercept. How would we be able to determine the optimal values for the bias and the intercept? We need to use the labeled examples to estimate the values for the weights and the bias. In supervised learning, we build a model by examining many examples and attempting to find a model that minimizes loss; this is called empirical risk minimization.
+
+--? What is loss?
+Loss is the penalty for a bad prediction. Loss is the number indicating how bad the model's prediction was on a single example. If the model's prediction is prefect, the loss would be zero; otherwise, the loss is greater. T How do we measure the loss? 
