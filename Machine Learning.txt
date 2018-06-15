@@ -34,4 +34,50 @@ For a more sophisticated model, it may use multiple characteristics to predict t
 Training a model simply means learning (determining, figuring out) the good values for all the weights and the bias from labeled examples. In other words, we need to draw the relationship line, which requires figuring the best values for the slop and the intercept. How would we be able to determine the optimal values for the bias and the intercept? We need to use the labeled examples to estimate the values for the weights and the bias. In supervised learning, we build a model by examining many examples and attempting to find a model that minimizes loss; this is called empirical risk minimization.
 
 --? What is loss?
-Loss is the penalty for a bad prediction. Loss is the number indicating how bad the model's prediction was on a single example. If the model's prediction is prefect, the loss would be zero; otherwise, the loss is greater. T How do we measure the loss? 
+Loss is the penalty for a bad prediction. Loss is the number indicating how bad the model's prediction was on a single example. If the model's prediction is prefect, the loss would be zero; otherwise, the loss is greater. The goal of training a model is to discover a set of weights and bias such that the model has low loss, on average, across all labeled examples.
+Basically, loss is the difference between the line(model) and the examples.
+
+--? How do we measure aggregate loss(differences between the model and the examples)?
+We can use squared loss(a popular loss function) L2 loss. The squared loss for a single example is as follows
+i.e. for a single example, we calculate the loss as follow.
+squared loss L2 = the square of the difference between the label and the prediction
+= (observations - prediction(x))^2 = (y- y')^2
+Mean square error (MSE) is the average squared loss per example over the whole dataset. Sum up all the squared loss for all the examples, then divide by the number of examples.
+MSE = SUM[all examples](y-y')^2
+
+--? How can a model reduces the loss iteratively?
+How do we modify our model to obtain a possibly better model? Given that we've created some model, tuning the model to devise a better model is always what we want to aim for. There are so many ways to tune the model, so the real trick is how we can efficiently search for the best model if possible. Key point: A machine learning model is trained by starting with guess values for the weights and bias, then iteratively modifies thoses guesses until learning the weights and bias with the lowest possible loss. Once the overall loss stops changing or at least changes are extremely slow, then we say the model has converged.
+
+features --- model with parameters such as weights and bias -----> predict y' \
+						^														v
+						|Adjust parameters <------compute the loss L2 = sum all (y - y')^2
+																				^
+label    --------------------------------------------------------> actual  y  / 
+
+--? How do we efficiently find the convergence point, which is the optimal value of the weight such that the loss is minimum?
+Given a example (x, y) and y' = w0 + w1.x, we have L2 = (y - y') ^2 = (y - w1.x)^2 = (b - w1.a) ^2 where the value of a and b are already known, so L2 is a function of w1. Thus, we can plot the loss curve.
+We can use the inefficient way, the brute force way, to calculate the loss for each of the possible values of the weight. A more efficient and popular method to find the optimal value for the weight is using gradient descent. The overall process is as follow: First, we'll pick a random value for the weight, then calculate gradient of the loss curve at that point w1 to know the direction and the magnitude of change since gradient is a vector. The gradient always points in the direction of steepest INCREASE in the loss function. The gradient descent algorithm goes the opposite direction to reduce loss as quickly as possible. Since we know the direction and the magnitude in which we can minimize the loss, we update our weight by a fraction of the gradient magnitude to further ourselves to the minimum point.
+
+?-- What is a gradient of a function?
+The gradient of a function %f is the vector of partial derivatives with respect to all of the independent variables %f
+ie. if f(x, y) = e^(2y).sin(x)
+then %f = (df(x, y)/dx, df(x, y)/dy) = (e^(2y).cos(x), 2e^(2y).sin(x))
+note that %f points in the direction of greatest increase of the function, so -%f points in the direction of greatest decrease of the function. Where %f is a vector (a vector has the head and tail point, usually the tail is at the orgin of the coordinate system.
+
+?-- What is learning rate?
+Learning rate is a scalar that is used to control the velocity of applying gradient descent on discovering the minimum or the valley. As the gradient is a vector with magnitude and direction, instead of simply updating the weight using the magnitude, we can adjust the magnitude by multiplying it with the learning rate. If the learning rate is less than 1, we reduce the magnitude of the original gradient, and if the learning rate is greater than 1, we increase the magnitude of the original gradient. i.e if the gradient magnitude is 2.5 and the learning rate is 0.01, then the gradient descent algorithm will pick the next point 0.025 away from the previous point.
+
+?-- What are hyperparameters?
+Hyperparameters are knobs that programmers tweak in machine learning algorithms. In our example, the knob is the learning rate. If we tune the learning rate to a small number, then it may take forever to reach the minimum valley. If we tune the learning rate to a large number, it may bounce back and forth before it finally reaches the valley. The ideal learning rate in one-dimension is 1/f(x)^n (the inverse of the second derivative of f(x) at x)
+
+?-- What are precaution when trying to set the learning rate?
+Setting the learning rate too large would make the gradient descent never reaches the minimum, so the key point is finding a learning rate that is large enough such that the gradient descent converges efficiently.
+
+?-- What is a batch in gradient descent?
+A batch is the total number of examples we use to calculate the gradient in a single iteration. ie, we take 1 example, and create the loss function. With the values of x and y known, the loss function becomes the function of the weight w1, from which we can draw a graph of w1 and loss. Pick a random value for w1, we calculate the gradient for this example. Then we take another example, do the same thing, draw the graph of weight and loss, and use the same value for weight from the first example to calculate the gradient. Then we take the average of these gradients.
+
+?-- What is stochastic gradient descent(SGD)?
+Stochastic gradient descent is an extreme take on gradient descent, in which it uses only a single example(a batch size of 1) per iteration. SGD works but very noisy. Specifically, the one example in the batch is chosen at random.
+
+?-- What is mini-batch stochastic gradient descent(mini-batch SGD)?
+It is the intermediate between full-batch iteration and SGD. A mini-batch is typically between 10 and 1,000 examples, chosen at random. Mini-batch SGD reduces the amount of noise in SGD but is still more efficient than full-batch.
