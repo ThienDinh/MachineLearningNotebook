@@ -13,7 +13,7 @@ A feature is one of the characteristics of the entity that we are studying. For 
 
 --? What is an example?
 An example is one instance of the data. We can say that it's one of the settings of the characteristics of the entity.
-There are two types of example, one is labeled examples and the other is unlabeld examples. The labeled example includes all the characteristics of the entity. The unlabeled example includes all characteristics of the entity, but the one that we try to infer about. We use labeled example as a thorough understanding of the entity, to learn about the entity, to use it as a fact about the entity. Using the labeled examples, we can build a model that can infer about the missing label on the unlabeled examples.
+There are two types of example, one is labeled examples and the other is unlabeld examples. The labeled example includes all the characteristics of the entity. The unlabeled example includes all characteristics of the entity, but the one that we try to infer about. We use labeled example as a thorough understanding of the entity, to learn about the entity, to use it as a fact about the entity. Using the labeled examples, we can build a model that can infer about the missing label on the unlabeled examples. Note that example can contain false values which introduces noice and contaminates our model.
 
 --? What is a model?
 A model defines the relationship between features and label; in other words, relationship between one characteristic to other characteristics of an entity. i.e. a spam detection model might associate certain features strongly with "spam".
@@ -81,3 +81,23 @@ Stochastic gradient descent is an extreme take on gradient descent, in which it 
 
 ?-- What is mini-batch stochastic gradient descent(mini-batch SGD)?
 It is the intermediate between full-batch iteration and SGD. A mini-batch is typically between 10 and 1,000 examples, chosen at random. Mini-batch SGD reduces the amount of noise in SGD but is still more efficient than full-batch.
+
+?-- What are the risks of overfiting?
+Sometimes the model overfits the training data. An overfit model gets a low loss during training but does a poor job predicting new data. The fundamental tension of machine learning is between fitting our data well, but also fitting the data as simply as possible.
+Machine learning's goal is to predict accurately on new data drawn from a hidding true probability distribution. Not how well you train the model, but how well the model can predict the label given the new data. 
+The fields statistical learning theory and computational learning theory have developed generalization bounds - a statistical description of a model's ability to generalize to new data based on factors such as the complexity of the model and the model's performance on training data. The theoretical analysis provides formal guarantees under idealized assumptions, thus being difficult to apply in practice.
+
+?-- How would we get the previously unseen data?
+We divide the data set into two subsets such as training set(a subset to train a model) and test set(a subset to test the model). After we train our model using the training set, we can test our model with the test set to see how well our model generalize. Assuming the test set is large enough(split 30% training set and 70% test set?)
+
+?-- What are the basic assumptions that guide generalization?
+We need to draw examples independently and identically(i.i.d) at random from the distribution. In other words, examples don't influence each other. An example of violation of this assumption is the model bases its choice of ads on what ads the user has previously seen.
+The distribution is stationary. In other words, the distribution doesn't change within the data set. An example of violation of stationarity principle is that given the data set that contains retail sales information for a year, user's purchases change seasonally, meaning that the sales concentrate in some months such as December with Thanksgiving or Christmas, and other months the sales are less likely or even worse when compared with December.
+Draw examples from partitions from the same distribution.
+
+--? What are considerations when we divide the examples to training set and test set?
+Make sure that your test set meets the following two conditions: large enough to yield statistically meaningful results, and representative of data set as a whole. In other words, test set must have the same characteristics like the training set.
+Our test set serves as a proxy for new data.
+
+--? Oh I've seen surprisingly good results on my evaluation metrics, does it mean that i'm solid and good to go?
+No, that might be a sign that we are accidentally training on the test set. For example, high accuracy might indicate that test data has leaked into the training set. For example, building a model that predicts whether an email is spam using subject line, email body, sender's email address as features. We split data into 80-20, then training the model. After that we evaluate the model with the test set, and we achive 99% precision. What a great job we did! No, looking carefully at the data, we see that examples in the test set are duplicates of examples in the training set. That's why we achive so high precision on the test set. That is one of the cautions that we need to pay attention to before splitting data into training set and test set. In this case, we can try to eliminate duplicates on the data set before we split the data. Unless we eliminate duplicate examples, we are no longer accurately measuring how well our model generalizes to new data. When we test our model with the test set, we evaluate the model's generalization ability.
