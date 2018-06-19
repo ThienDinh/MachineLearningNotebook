@@ -162,3 +162,91 @@ A synthetic feature is a feature created by two ore more existing features.
 A correlation matrix shows pairwise correlations, both for each feature compared to the target and for each feature compared to other features.
 Pearson correlation coefficient (PCC) Pearson's r, the Pearson product-moment correlation coefficient (PPMCC) or the bivariate correlation, is a measure of the linear correlation between two variables X and Y. If the value is between +1 and -1, it's total positive linear correlation, 0 is no linear correlation, -1 is total negative linear correlation. Pearson's correlation coefficient is the covariance of the two variables divided by the product of their standard deviations.
 Viewing the correlation matrix, we should select features that are strongly correlated with the target. Also, we like to have features that aren't so strongly correlated with each other, so that they add independent information(remember independent vectors in linear algebra). Using this information to try removing features, and also try developing additional synthetic features, such as ratios of two raw features.
+
+--? What is a feature cross?
+A feature cross is a synthetic {feature} formed by multiplying (crossing) two or more features. Crossing combinations of features can provide predictive abilities beyond what those features can provide individually. Given a situation where we have a data set containing two types of tree, one is sick tree, and the other is healthy tree. Looking at the locations of the trees, we see that sick trees are in Quadrant I and Quadrant III, and healthy trees are in Quadrant II and Quadrant IV. The problem is that it is impossible to draw a line that can separate the sick trees from the healthy trees. Why do we need to draw a line to separate the trees though? Ok this is a new concept. When we are able to draw a line to separate sick trees and healthy trees, we say it's a linear problem; otherwise, we would say it's a nonlinear problem. To solve nonlinear problem, we need to create a feature cross. A feature cross is a synthetic feature that {encodes nonlinearity} in the feature space by multiplying two or more input features together (the term cross comes from cross product). Let's create a feature cross named x3 by crossing x1 and x2: x3 = x1.x2. We'll treat this newly minted x3 feature cross just like any other feature. So our new equation for the line would be: y = bias + weight1.x1 + weight2.x2 + weight3.x3. A linear algorithm can learn a weight for w3 just as it would for weight1 and weight2. This means that although w3 encodes nonlinear information, we don't need to change how the linear model trains to determine the value of w3.
+
+--? What are kinds of feature crosses?
+We can create many different kinds of feature crosses. For example:
+A.B: a feature cross formed by multiplying the values of two features.
+A.B.C.D.E: a feature cross formed by multiplying the values of five features.
+A.A: a feature cross formed by squaring a single feature.
+Note: Supplementing scaled linear models with feature crosses has traditionally been a efficient way to train on massive-scale data sets.
+
+--? How do we perform feature cross with one-hot vectors?
+Given an example where we have two features: country and language. A one-hot encoding of each feature generates vectors with binary features that can be interpreted as country={USA, France}, language={English, Spanish}. Then if we create a feature cross of these one-hot encodings, we'll get binary features that can be interpreted as logical conjunctions such as country:USA AND language:Spanish. Another example would be supposing you bin latitude and longitude, producing separate one-hot five-element feature vectors. A given latitude and longitude could be represented as follows: binned_latitude=[0, 0, 0, 1, 0], and binned_longitude=[0, 1, 0, 0, 0]. Suppose we create a feature cross of these two feature vectors: binned_latitude X binned_longitude. This feature cross is a 25-element one-hot vector(24 zeros and 1 one). The single 1 in the cross identifies a particular conjunction of latitude and longitude. Our model can then learn particular associations about that conjunction.
+Suppose we bin latitude and longitude much more coarsely:
+binned_latitude(lat)= [
+0 < lat <= 10
+10 < lat <= 20
+20 < lat <= 30
+]
+binned_longitude(lon)= [
+0 < lon <= 15
+15 < lon <= 30
+]
+Creating a feature cross of those coarse bins leads to synthetic feature having the following meanings:
+binned_latitude_X_longitude(lat, lon) = [
+0 < lat <= 10 and 0 < lon <= 15
+0 < lat <= 10 and 15 < lon <= 30
+10 < lat <= 20 and 0 < lon <= 15
+10 < lat <= 20 and 15 < lon <= 30
+20 < lat <= 30 and 0 < lon <= 15
+20 < lat <= 30 and 15 < lon <= 30
+]
+Another example would be our model needs to preditct how satisfied dog owners will be with dogs based on two features: behavior type(barking, crying, snuggling, etc.) and time of day. If we build a feature cross from these features: [behavior type x time of day] then we'll end up with vastly more prdictive ability than either feature on its own. For example, if a dog cries(happily) at 5:00pm when the owner returns from work will likely be a great positive predictor of owner satisfaction. Crying (miserably) at 3:00 am when the owner was sleeping soundly will likely be a strong negative predictor of owner satisfaction. Linear learners scale well to masstive data. Using feature crosses on masstive data sets is one efficient strategy for learning highly complex models. Neural networks provide another strategy.
+
+--? What are the cautions with overcrossing?
+Sometimes the feature crosses are contributing far less to the model than the normal (uncrossed) features (how do we know? just look at the weight). Using feature crossing, if we use a model that is too complicated, or much more complicated than the actual characteristics of the data, such as one with too many crosses, we give it the opportunity to fit to the noise in the training data, often at the cost of making the model perform badly on test data.
+
+--? What does regularization mean?
+Regularization means penalizing the complexity of a model to reduce overfitting. When the model is overfitting the data in the training set, we could prevent overfitting by penalizing complex models, a principle called regularization. Instead of minimizing loss (empirical risk minimization): minimize(Loss(Data|Model)), we'll now minimize loss+complexity, which is called structural risk minimization: minimize(Loss(Data|Model) + complexity(Model)). Our training optimization algorithm is now a function of two terms: the loss term, which measures how well the model fits the data, and the regularization term, which measures model complexity.
+
+--? Why and when do we need to perform regularization?
+When we plot the generalization curves, we see that the loss for training data decreases with iteration, but the loss for validation data eventually goes up, meaning that the model has been overfitting the training set, and it doesn't generalize well so that it can make a good prediction on the validation set. Why? For each iteration, the weights are adjusted so that it minimizes the loss between the model and the training data. The adjustment is influenced by the learning rate(which affect the magnitude of the gradient).
+
+--? Generalization curve, what is that?
+Generalization curve shows the loss for both the training set and validation set against the number of training iterations.
+
+--? What is model complexity?
+Model complexity as a function of the weights of all the features in the model. In this case, a feature weight with a high absolute value is more complex than a feature weight with a low absolute value. We can quantify complexity using the L2 regularization formula, which defines the regularization term as the sum of the squares of all the feature weights: L2 regularization term = ||w||^2= w1^2 + w2^2 + ... + wn^2. In this formula, weights close to zero have little effect on model complexity, while outlier weights can have a huge impact. ie. A linear model with the following weights {w1=0.2, w2=0.5, w3=5, w4=1, w5=0.25, w6=0.75} has an L2 regularization term of 26.915. Note that w3, with a squared value of 25, contributes nearly all the complexity. The sume of the squares of all five other weights adds just 1.915 to the L2 regularization term.
+Model complexity as a function of the total number of features with nonzero weights.
+
+--? How do we tune the overall impact of the regularization term?
+We could do it by multiplying its value by a scale known as lambda(also called the regularization rate). That is, model developers aim to do the following: minimize(Loss(Data|Model) + lambda.complexity(Model)). Performing L2 regularization has the following effect on a model: encourages weight values toward 0(but not exactly 0), and encourages the mean of the weights toward 0, with a normal (bell-shaped or Gaussian) distribution. Increasing the lambda value strengthens the regularization effect.  Note: lambda*complexity(model) = lambda*(w1^2 + w2^2 + w3^2 + ... + wn^2)= lambda*w1^2 + lambda*w2^2 + lambda*w3^2 + ... + lambda*wn^2
+
+--? What are some cautions when choosing a lambda value?
+The goal is to strike the right balance between simplicity and training-data fit: if your lambda value is too high, your model will be simple, but you run the risk of underfitting your data. Your model won't learn enough about the training data to make useful predictions; if your lambda value is too low, your model will be more complex, and you run the risk of overfitting your data, and your model will learn too much about the particularities of the training data, and won't be able to generalize to new data. Setting lambda to zero removes regularization completely. In this case, training focuses exclusively on minimizing loss, which poses the highest possible overfitting risk. The ideal value of lambda produces a model that generalizes well to new, previously unseen data.
+By learning, we mean adjusting the weights so that it generalizes well on test data. Pick one example with the values for the features and the label, try to update the weights with iterations so that the model has good combination of weights to predict well on test data.
+
+--?
+The weights of the features and some of the feature crosses have lower absolute values, which implies that model complexity drops.
+
+--? Why logistic regression?
+Problem it solves? Logistic regression is like a specialized version of linear regression, in which the output is constrainted to the range from 0 to 1.
+Does it relate to anything that I know before somehow? It relates to linear regression, which is a type of regression model, which is a type of model that outputs continous values instead of classification models outputing discrete values, that outputs a continous value from a linear combination of input features.
+
+--? What is logistic regression?
+Instead of predicting exactly 0 or 1, logistic regression generates a probability - a value between 0 and 1, exclusive. For example, consider a logistic regression model for spam detection. If the model infers a value of 0.932 on a particular email emssage, it implies a 93.2% probability that the email message is spam. More precisely, it means that in the limit of infinite training examples, the set of examples for which the model predicts 0.932 will actually be spam 93.2% of the time and the remaining 6.8% will not.
+Many problems require a probability estimate as output. Logistic regression is an extremely efficient mechanism for calculating probabilities. We can use the returned value from logistic regression in either of the following two ways: as is, or converted to a binary category.
+
+--? How do we use the returned value from logistic regression "as is"?
+Suppose we create a logistic regression model to predict the probability that a dog will bark during the middle of the night. We'll call that probability: p(bark | night). If the logistic regression model predicts a p(bark | night) of 0.05, then over a year, the dog's owners should be startled awake approximately 18 times: startled = p(bark | night) * nights = <-> 18 ~= 0.05 * 365.
+
+--? How do we use the returned value from logistic regression as a binary category?
+In many cases, we'll map the logistic regression output into the solution to a binary classification problem, in which the goal is to correctly predict one of two possible labels (spam or not spam)
+
+--? How are we sure that the logistic regression model can ensure output that always falls between 0 and 1?
+As it happens, a sigmoid function, defined as follows, produces output having those same characteristics: y=1/(1+e^-z)
+If z represents the output of the linear (regression) layer of a model trained with logistic regression, then signmoid(z) will yield a value (a probability) between 0 and 1. In mathematical terms:
+y' = 1/(1+e^(-z)), where y' is the output of the logistic regression model for a particular example, z is b + w1x1 + w2x2 + ... + wnxn, where w values are the model's learned weights and bias, and x values are the feature values for a particular example. Note taht z is also referred to as the log-odds z = log(y/(1-y))
+
+--? Loss Function for Logistic Regression
+The loss function for linear regression is squared loss. The loss function for logistic regression is Log Loss, which is defined as follows:
+Log Loss = Sum all (x, y) in Dataset(-ylog(y') - (1 - y)log(1 - y')) where (x, y) in Dataset, y is the label in a labeled example every value of y must be either be 0 or 1, and y' is the predicted value, give the set of features in x.
+
+--? What does early stopping mean?
+Early stopping is a method for regularization that involves ending model training before training loss finishes decreasing. In early stopping, we end model training when the loss on a validation data set starts to increase, that is, when generalization performance worsens.
+
+--? Classification
+Logistic regression can be used for classification tasks.
