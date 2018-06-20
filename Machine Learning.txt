@@ -114,7 +114,7 @@ The test sets and validation sets wear out with repeated use, meaning that we sh
 A feature vector is the set of floating-point values comprising the examples in your data set.
 
 --? What is feature engineering?
-Feature engineering means transforming raw data into a feature vector.
+Feature engineering means transforming raw data into a feature vector. We convert an example to a vector. In the vector, it could be that each element refers to a single feature, or a group of elements refers to a feature(feature cross).
 
 --? How do we map raw data to numeric values?
 Mapping numeric values: 
@@ -123,7 +123,7 @@ Mapping categorical values:
 	Categorical features have a discrete set of possible values. Since models cannot multiply strings by the learned weights, we use feature engineering to convert strings to numeric values. Map feature values of interests(streets of interest in the data set) to integers, and we call it vocabulary. We can map all other values that exclude previous ones(all other streets) into a catch-all other category, known as an OOV(out-of-vocabulary) bucket. Using this approach, we can map the street names to numbers: Charleston Road to 0, North Shoreline Boulevard to 1, Shorebird Way to 2, Rengstorff Avenue to 3, and everything else (OOV) to 4. However, by incorporate these index numbers directly into our model, there are some downfalls or constraints for this approach, consider a model that predicts house prices using street_name as a feature. Our model needs the flexibility of learning different weights for each street that will be added to the price estimated using the other features, meaning that the model should learn different weights for different streets. Also, we aren't accounting for cases where street_name mahy take multiple values. For example, many houses are located at the corner of two streets, and there's no way to encode that information in the street_name value if it contains a single index. To remove both these constraints, we can instead create a binary vector for each categorical feature in our model that represents values as follows: for values that apply to the example, set corresponding vector elements to 1, and set all other elements to 0. The length of this vector is equal to the number of elements in the vocabulary. This representation is called a one-hot-encoding when a single value is 1, and a multi-hot encoding when multiple values are 1. i.e street_name: "Shorebird Way" --feature engineering--> street_name feature = [0,0,0,...,1,...,0,0]. This approach effectively creates a Boolean variable for every feature value. Here, if a house is on Shorebird Way then the binary value is 1 only for Shorebird Way. Thus, the model uses only the weight for Shorebird Way. Similary, if a house is at the corner of two streets, then two binary values are set to 1, and the model uses both their respective weights.
 
 --? What is sparse representation?
-Suppose that we have 1 million different street names in our data set that we want to include as values for street_name. Explicitly creating a binary vector of 1 million elements where only 1 or elements are true is a very inefficinet representatioin in terms of both storage and computation time when processing these vectors. Note that if we have 100 examples, feature engineering would transform these examples to include 100*1,000,000 = 100 million elements, which is very inefficient in term of storage. In this situation, a common approach is to use a sparse representation in which only nonzero values are stored. In sparese representations, an independent model weight is still learned for each feature value.
+Suppose that we have 1 million different street names in our data set that we want to include as values for street_name. Explicitly creating a binary vector of 1 million elements where only 1 or elements are true is a very inefficinet representation in terms of both storage and computation time when processing these vectors. Note that if we have 100 examples, feature engineering would transform these examples to include 100*1,000,000 = 100 million elements, which is very inefficient in term of storage. In this situation, a common approach is to use a sparse representation in which only nonzero values are stored. In sparse representations, an independent model weight is still learned for each feature value.
 
 --? What are qualities of good characteristics of an entity?
 Avoid rarely used discrete feature values: 
@@ -249,4 +249,81 @@ Log Loss = Sum all (x, y) in Dataset(-ylog(y') - (1 - y)log(1 - y')) where (x, y
 Early stopping is a method for regularization that involves ending model training before training loss finishes decreasing. In early stopping, we end model training when the loss on a validation data set starts to increase, that is, when generalization performance worsens.
 
 --? Classification
-Logistic regression can be used for classification tasks.
+Logistic regression can be used for classification tasks. Logistic regression returns a probability, and we can use the returned probability "as is" or convert the returned probability to a binary value. Given an example where we have a logistic regression model returning 0.9995 for a particular email message, we can predict that the email is very likely to be spam. Conversely, another email message with a prediction score of 0.0003 on that same logistic regression model is very likely not spam. So what about an email message with a prediction score of 0.6? In order to map a logistic regression value to a binary category, we must define a classification threshold (also called the decision threshold). A value above that threshold indicates "spam"; a value below indicates "not spam". It is tempting to assume that the classification threshold should always be 0.5, but thresholds are problem-dependent, and are therefore values that you must tune (just like the learning rate -- wrong: tuning a threshold for logistic regression is different from tuning hyperparameters such as learning rate; part of choosing a threshold is assessing how much we'll suffer for making a mistake; ie mistakenly labeling a non-spam message as spam is very bad. However, mistakenly labeling a spam message as non-spam is unpleasant, but we know it's kind of acceptable).
+
+ --? Classification: What's up with True vs. False and Positive vs. Negative
+ Metrics that we'll use to evaluate classification models.
+ True means that the thing indicated Positive is actually what it is.
+ False means that the thing indicated Positive is not what it claims to be.
+ The value True or False is based on the Reality of the event.
+ Positive - a statement that tells something.
+ Negative - the negation of the Positive. We can also think of it as another statement in case there are more than two classes.
+A true positive is an outcome where the model correctly predicts the positive class. Similary, a true negative is an outcome where the model correctly predicts the negative class.
+A false positive is an outcome where the model incorrectly predicts the positive class. Similary, a false negative is an outcome where the model incorrectly predicts the negative class.
+
+--? Ok, let's look at one of the metrics such as accuracy
+Accuracy is one metric for evaluating classification models. Informally, accuracy is the fraction of predictions our model got right.
+Accuracy = (Number of correct predictions / Total number of predictions)
+For binary classification, accuracy can also be calculated in terms of positives and negatives as follows:
+Accuracy = (number of true positive + number of true negative) / (number of true positive + number of false positive + number of true negative + number of false negative)
+let's have an example: the following model that classified 100 tumors as maligant(the positive class) or benign (the negative class):
+True Positive:
+	Reality - malignant; Predicted as - Malignant; Number of True Positive - 1
+False Negative:
+	Reality - malignant; Predicted as - benign; Number of False Negative - 8
+False Positive:
+	Reality - benign; predicted as - malignant; number of false positive - 1
+True Negative:
+	Reality - benign; predicted as - benign; number of true negative - 90
+The accuracy would be calculated as (1 + 90) / (1 + 8 + 1 + 90) = 91/100 = 0.91
+Inference about the result: accuracy comes out to 0.91 or 91% (91 correct predictions out of 100 total examples). That means our tumor classifier is doing a great job of identifying malignancies, isn't it?
+Let's do a closer analysis of positives and negatives to gain more insight into our model's performance.
+Of the 100 tumor examples, 91 are benign (90 TNs and 1 FP) and 9 are malignant (1 TP and 9 FNs). However, of the 9 malignant tumors, the model only correctly identifies 1 as malignant - a terrible outcome, as 8 out of 9 malignancies go undiagnosed!
+Accuracy alone doesn't tell the full story when we're working with a class-imbalanced data set, like this one, where there is a significant disparity between the number of positive and negative labels.
+
+--? Ok, given the accuracy metric alone is not good enough, let's look at two better metrics: precision and recall.
+Precision attempts to answer the following question: What proportion of positive identifications was actually correct?
+	Precision = number of True Positive / (number of True Positive + number of False Positive)
+	A model that produces no false positives has a precision of 1.0.
+	let's calculate the precision for the tumor example:
+	Precision (for Possitive Class) = 1 / (1 + 1) = 0.5 => our model has a precision of 0.5 - in other words, when it predicts a tumor is malignant, it is correct 50% of the time.
+	Precision (for Negative Class) = 90 / (8 + 90) = 90/98 ~= .92 => our model has a precision of .92, meaning when it predicts a tumor is benign, it is correct 92% of the time.
+Recall attempts to answer the following question: What proportion of actual positives was identified correctly?
+	Recall = true class / reality class = true possitive / (true positive + false negative)
+	A model that produces no false negatives has a recall of 1.0
+	let's calculate the recall for the tumor example:
+	Recall (for Positive Class) = 1 / (1 + 8) = 1 / 9 = 0.11 => our model has a recall of 0.11, meaning that it correctly identifies 11% of all malignant tumors.
+	Recall (for Negative Class) = 90 / (90 + 1) = 90/91 ~= 0.99 => our model has a recall of 0.99, meaning that it correctly identifies 99% of all benign tumors. 
+Precision looks at the prediction, and Recall looks at the reality.
+
+--? How do we evaluate the effectiveness of a model?
+We must examine both precision and recall. One interesting relationship between precision and recall is that they are two extrems of a spectrum, meaning that improving precision typically reduces recall and vice versa. We alreadly have the logistic function to compute the probability value for each of the example on the scale from 0 to 1. Plotting on the example on the 0 to 1 scale, coloring them by their actual labels, draw the classification threshold to separate negative class and positive class.
+
+--? What is ROC curve?
+An ROC curve (receiver operating characteristic curve) is a graph showing the performance of a classification model at all classification thresholds. This curve plots two parameters: True Positive Rate and False Positive Rate. True Positive Rate is a synonym for recall and is defined as follows: TPR = TP / (TP + FN). Note that this is for binary classes, sometimes we may have more than 2 classes, we can group the other classes into one group, so turning m-class problem into binary class problem. False Positive Rate is defined as follow: FPR = FP/(FP + TN)
+Look at https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc for a plot of TPR vs. FPR at different classification thresholds. Lowering the classification threshold classifies more items as positive, thus increasing both False Positives and True Positives. To compute the points (to draw the curve) in an ROC curve, we could evaluate a logistic regression model (to assign values to examples) many times with different classification thresholds (to classify the examples), but this would be inefficient. Fortunately, there's an efficient, sorting-based algorithm that can provide this information for us, called AUC (Area Under the ROC Curve)
+
+--? Why do calculating area under the ROC Curve help us draw the ROC curve before we even know how to plot it?
+AUC measures the entire two-dimensional area underneath the entire ROC curve(think integral calculus). So how calculating the area help discover the points? AUC provides an aggregate measure of performance across all possible classification thresholds (but isn't that we need the function to draw the curve in order to calculate the area under the curve?) One way of interpreting AUC is as the probability that the model ranks a random positive example more highly than a random negative example. AUC represents the probability that a random positive (green) example is positioned to the right of a random negative (red) example. Is it that we pairwise count the number of possive that are to the right of the negative? AUC ranges in value from 0 to 1 (0 means none of the positive is to the right of the negative, and 1 means all of the positive is to the right of the negative). A model whose predictions are 100% wrong has an AUC of (0.0 why? because to the right of the classification threshold are the positive, but all of it was the negative); one whose predictions are 100% correct has an AUC of 1.0 (why? because all the positive examples are to the right of all the negative examples, and we can easily select the classification threshold). Do we really know how to use AUC? Why is AUC desirable? It is desirable for the two following reasons: AUC is scale-invariant, for it measures how well predicitons are ranked, rather than their absolute values (why? because it just consider the relative position between examples on the scale, regardless whatever the value of the example has), and AUC is classification-threshold-invariant, for it measures the quality of the model's predictions irrespective of what classification threshold is chosen (regardless of the position of the classification threshold, the number counting the relative positions of the positive and the negative examples are constant). However, both these reasons come with caveats, which may limit the usefulness of AUC in certain use cases: Scale invariance is not always desirable, and classification-threshold invariance is not always desirable. 
+Rank(ordinality): The ordinal position of a class in an ML problem that categorizes classes from highest to lowest. For example, a behavior ranking system could rank a dog's reqards from highest (a steak) to lowest (wilted kale).
+
+--? What is prediction bias?
+Logistic regression predictions should be unbiased, meaning "average of predictions" should ~= "average of observations"??? what is average of observations?
+Prediction bias = average of predictions - average of labels in data set. Note: Prediction bias is a different quantity than bias (the b in wx + b).
+The prediction bias is a quantity that measures how far apart those two averages are. A significant nonzero prediction bias tells us there is a bug somewhere in our model, as it indicates that the model is wrong about how frequently positive labels occur {the frequency of the positive labels in prediction should be close to the frequency of the positive labels in observation}. For example, let's say we know on average , 1% of all emails are spam. If we don't know anything at all about a given email, we should predict taht it's 1% likely to be spam. Similarly, a good spam model should predict on average that emails are 1% likely to be spam. If instead, the model's average predicition is 20% likelihood of being spam, we can conclude that it exhibits prediction bias. What are the possible causes of prediction bias from the model? The causes are incomplete feature set, noisy data set, buggy pipeline, biased training sample, overly strong regularization. With the bias model, we can fix it by adding calibration layer that adjusts our model's output to reduce the prediction bias. For example, if our model has +3% bias, we could add a calibration layer that lowers the mean prediction by 3%. However, adding a calibration layer is a bad idea for the following reasons: we're fixing the symptom rather than the cause, and we've built a more brittle system that we must keep up to date. Note: a good model will usually have near-zero bias. That said, a low prediction bias does not prove that our model is good. A really terrible model could have a zero prediction bias. For example, a model that just predicts the mean value for all examples would be a bad model, despite having zero bias.
+
+--?
+When our model is overly regularized, consider reducing the value of lambda. Generally, a good model does not give more weight to a particular feature. The weights are evenly distributed, and we can achieve this by applying regularization. The weights are updated by the gradient descent per iteration. How does regularization effect the model training each iteration?
+
+
+--? What is the problem?
+Sometimes we have feature vectors contains millions of elements, feature crossing this feature with itself, create a trillion elements feature vector. Most of the elements are 0. In a high-dimensional sparse vector, it would be nice to encourage weights to drop to exactly 0. A weight of exactly 0 essentially removes the corresponding feature from the model. So on which feature should we encourage the weight to be close to 0? How do we detect meaningless feature? We might be able to encode this idea into the optimization problem done at training time, by adding an appropriately chosen regularization term. L2 regularization encourages weights to be small, but doesn't force them to exactly 0.0 (why? because the limitation of the formula?) Why L1? L1 regularization serves as an approximation to L0, a regularization term penalizing the count of non-zero coefficient values in a model. L1 has the advantage of being convex and thus efficient to compute. So we can use L1 regularization to encourage many of the uniformative coefficients (the feature values of an example that we use to search for our weights) in our model to be exactly 0, thus saving RAM at inference time.
+
+minimize(loss) ~ gradient_descent(loss) ~ derivative(loss)
+--? What is the difference between L1 vs L2 regularization?
+L2 and L1 penalize weights differently
+L2 penalizes weight^2, and L2 penalizes |weight|
+Consequently, L2 and L2 have a different derivatives:
+the derivative of L2 is 2 * weight, and the derivative of L1 is k(a constant, whose value is independent of weight).
+L2 removes x% of the weight every time, and L1 subtracts some constant from the weight every time.
+L1 penalizes the absolute value of all the weights.
