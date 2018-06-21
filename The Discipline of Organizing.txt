@@ -3,3 +3,6 @@ Chapter 1. Foundations of organizing systems
 1.1. The discipline of organizing
 To organize is to create capabilities(powers or abilities) by intentionally imposing order and structure. The intention of the book is to develop self-conciousness about what it means to organize things whether they are physical resources or digital resources, and about principles or the basis by which the resources are organized.
 There are 4 types of organizing: we organize physical things, we organize information about physical things, we organize digital things, and we organize information about digital things.
+When the things and the informationn about them are both in physical format, it is easy to see that the former is a primary resource and the latter a surrogate or associated resource that describes or relates to it, meaning that they both are resource and one references the other.
+physical things, digital things, and information about such things can be considered as resources. 
+Every system of organization involves a choice of properties or principles used to describe and arrange the resources and to support interactions with those resources. So two things about a system of organization are the properties or the characteristics of the system, and how the system serve their resources efficiently.

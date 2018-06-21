@@ -327,3 +327,23 @@ Consequently, L2 and L2 have a different derivatives:
 the derivative of L2 is 2 * weight, and the derivative of L1 is k(a constant, whose value is independent of weight).
 L2 removes x% of the weight every time, and L1 subtracts some constant from the weight every time.
 L1 penalizes the absolute value of all the weights.
+
+--? Introduction to Neural Networks?
+What does nonlinear mean? Nonlinear means that you can't accurately predict a label with a model of the form b + w1.x1 + w2.x2, meaning we can't draw a line separates the two classes. In other words, the dicision surface is not a line.
+We've added an activation function, adding layers has more impact. Stacking nonlinearities on nonlinearities lets us model very complicated relationships between the inputs and the predicted outputs. In brief, each layer is effectively learning a more complex, higher-level function over the raw inputs.
+Hidden layers are linear layers, there are layers that are non-linear transformation layers
+The issue with neural network is that it's challenging to understand how it trains itself.
+Working with low-dimensional deep neural networks with a few neurons in each layer is easier to explore. In fact, we can creat visualizations to completely understand the behavior and training of such networks. 
+Common activaion functions: the following sigmoid activation function converts the weighted sum to a value between 0 and 1. F(x) = 1/(1 + e^(-x))
+The following rectified linear unit activation function (ReLU) often works a little better than a smooth function like the sigmoid, while also being significantly easier to compute. F(x) = max(0,x)
+In fact, any mathematical function can serve as an activation function. Suppose that theta represents our activation function(ReLU, Sigmoid, or whatever).
+Consequently, the value of a node in the network is given by the following formula: theta(w.x + b), where theta is a function.
+
+--? What are components of a neural network?
+A set of nodes, analogous to neurons, organized in layers.
+A set of weights representing the connections between each neural network layer and the layer beneath it. The layer beneath may be another neural network layer, or some other kind of layer.
+A set of biases, one for each node.
+An activation function that transforms the output of each node in a layer. Different layers may have different activation functions.
+
+--? What is decision boundary?
+The separator between classes learned by a model in a binary clas or multi-class classification problems(to draw it, the model has to make prediction on all the possible input). For example, in the following image representing a binary classification problem, the decision boundary is the frontier between the orange clas and the blue class.
