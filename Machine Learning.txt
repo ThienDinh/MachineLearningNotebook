@@ -347,3 +347,66 @@ An activation function that transforms the output of each node in a layer. Diffe
 
 --? What is decision boundary?
 The separator between classes learned by a model in a binary clas or multi-class classification problems(to draw it, the model has to make prediction on all the possible input). For example, in the following image representing a binary classification problem, the decision boundary is the frontier between the orange clas and the blue class.
+
+--? Training Neural Networks.
+Backpropagation is the most common trainin algorithm for neural networks. The goal is to learn the weights of the network automatically from data such that the predicted output y.output is close to the target y.target for all inputs x.input. To measure how far we are from the goal, we use an error function E. A commonly used error function(loss function) is E(y.output, y.target) = 1/2(y.output-y.target)^2
+Forward propagation
+Input example (x.input, y.target)  and update the input layer of the network. For consistency, we consider the input to be like any other node but without an activation funcction so it's output is equal to its input, i.e. y1 = x.input.
+[propagate]: to transmit smoething through a medium; to cause to spread out and affect a greater number or greater area.
+
+
+Error derivative --- E(y.output, y.target) = 1/2(y.output - y.target)^2
+The backpropagation algorithm decides how much to update each weight of the network AFTER COMPARING the predicted output with the actual ouput for a particular example(training on 1 example - stochatics gradient descent). For this, we need to compute how the error changes with respect to each weight dE/dWij. Because the error function is a function of n-weight, so we need to take n derivatives with respect to each weight independently.
+Once we have the error derivatives, we can update the weights using a simple update rule: Wij = Wij - alpha.dE/dWij, where alpha is a positive constant, learning rate.
+Additionally, we store how the error changes with: the total input of the node dE/dx and the output of the node dE/dy.
+Now, back propagation: let's begin backpropagating the error derivatives.
+E = 1/2(y.output - y.target)^2
+pE/pY.output = y.output - y.target
+Using the chain rule, we can compute dE/dx
+pE/px = dy/dx.pE/py=df(x)/dx.pE/py where df(x)/dx = f(x)(1 - f(x)) when f(x) is the Sigmoid activation function.
+As soon as we have the error derivative with respect to the total input of a node, we can get the error derivative with respect to the weights coming into that node.
+pE/pWij = pXj/pWij . pE/pXj = Yj.pE/pXj
+Animation of backpropagation https://google-developers.appspot.com/machine-learning/crash-course/backprop-scroll/
+
+--? Multi-Class Neural Networks: One vs. All
+One vs. all provides a way to leverage binary classification. Given a classification problem with N possible solutions, a one-vs.-all solution consists of N separate binary classifiers-one binary classifier for each possible outcome. During training, the model runs through a sequence of binary classifiers, training each to answer a separate classification question. For example, given a picture of a dog, five different recognizers might be trained, four seeing the image as a negative example (not a dog) and one seeing the image as a positive example (a dog). That is:
+1. Is this image an apple? No.
+2. Is this miage a bear? No.
+3. is this image candy? No.
+4. Is this image a dog? Yes.
+5. is this image an egg? No.
+This approach is fairly reasonable when the total number of classes is small, but becomes increasingly inefficient as the number of classes rises.
+We can create a significant more efficient one-vs.-all model with a deep neural network in which each output node represents a different class. 
+
+--? Softmax?
+Softmax assigns decimal probabilities to each class in a multi-class problem. Those decimal probabilities must add up to 1.0. This additional constraint helps training converge more quickly than it other wise would. With the above example, Softmax might produce the following likelihoods of an image belonging to a particular class:
+Class 	Probability
+apple 	0.001
+bear 		0.04
+candy	0.008
+dog 		0.95
+egg 		0.001
+Softmax is implemented through a neural network layer just before the output layer. The Softmax layer must have the same number of nodes a the output layer.
+Input ----> Layers -> Output --> Softmax Layer answering questions (# of nodes of Softmax = # of nodes of output).
+Softmax equation.
+Softmax Options: 
+	Full Softmax is the Softmax we've been discussing; that is, Softmax calculates a probability for every possible class.
+	Candidate sampling means that Softmax calculates a probability for all the positive labels but only for a random sample of negative labels. For example, if we are interested in determining whether an input image is a beagle or a bloodhound, we don't have to provide probabilities ofr every non-doggy example.
+One Label vs. Many Labels
+	Softmax assumes that each example is a member of exactly one class. Some examples can simutaneously be a member of multiple classes. For such examples, we may not use Softmax, and we must rely on multiple logistic regressions.
+	For example, suppose our examples are images containing exactly one item - a piece of fruit. Softmax can determine the likelihood of that one item being a pear, an orange, an apple, and so on. If our examples are images containing all sorts of things - bowls of different kinds of fruit - then we will have to use multiple logistic regressions instead.
+
+--? Embeddings
+An embedding is a relatively low-dimensional space into which you can translate high-dimensional vectors, meaning dimensional reduction. Embeddings make it easier to do machine learning on large inputs like sparse vectors representing words. Ideally, an embedding captures some of the semantics of the input by placing semantically similar inputs close together in the embedding space. An embedding can be learned and reused across models.
+Collaborative filtering is the task of making predictions about the interests of a user based on interests of many other users.
+As an example, let's look at the task of movie recommendation. Suppose we have 1 million users, and a list of the movies each user has watched. Our goal is to recommmend movies to users.
+To solve this problem some method is needed to determine which movies are similar to each other. We can achieve this goal by embedding the moviews into a low-dimensional space created such that similar movies are nearby.
+
+--? Categorical Input Data
+Categorical data refers to input features that represent one or more discrete items from a finite set of choices. Categorical data is most efficiently represented via sparse tensors, which are tensors with evry few non-zero elements.
+Sparse representations have a couple of problems that can make it hard for a model to learn effectively.
+Size of Network: Huge input vectors mean a super-huge number of weights for a neural network. If there are M words in your vocabulary and N nodes in the first layer of the network above the input, we have MxN weights to train for that layer. A large number of weights causes further problems: Amount of data - teh more weights in our model, the more data we need to train effectively; amount of computation - the more weights, the more cmoputation required to train and use the model. It's easy to exceed the capabilities of our hardware. Also, lack of meaningful relations between vectors. The solution to these problems is to use embeddings, which translate large sparse vectors into a lower-dimensional space that {preserves semantic relationships}.
+An embedding is a matrix in which each column is the vector that corresponds to an item in your vocabulary.
+
+--? What is a bag of words?
+A vector contain counts of the words in a enormous chunck of text. In a bag-of-words vector, several of the 500,000 nodes would have non-zero value. To get the dense vector for a sparse vector representing multiple vocabulary items(all the words in a sentence or paragraph), we could retrieve the embedding for each individual item and then add them together.
